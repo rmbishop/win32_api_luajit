@@ -3,6 +3,7 @@ win32_api_luajit
 
 Tracking of Cosmin's win32 api for luajit (with adjustments)
 
+https://code.google.com/p/lua-files/wiki/winapi
 
 Instructions for building a version of luajit with the library linked in:
 
