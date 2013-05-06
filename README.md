@@ -23,3 +23,6 @@ Instructions for building a version of luajit with the library linked in:
 5)Run luajit.exe test.lua
 
 
+Here is the screenshot of running luajit.exe test2.lua, which uses the HTMLayout control.
+
+<img src=http://https://github.com/rmbishop/win32_api_luajit/shot1.png>
