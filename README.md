@@ -25,4 +25,4 @@ Instructions for building a version of luajit with the library linked in:
 
 Here is the screenshot of running luajit.exe test2.lua, which uses the HTMLayout control.
 
-<img src=http://https://github.com/rmbishop/win32_api_luajit/shot1.png>
+<img src=https://github.com/rmbishop/win32_api_luajit/shot1.png>
