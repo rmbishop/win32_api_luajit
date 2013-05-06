@@ -4,6 +4,7 @@ luajit.exe -b glue.lua  glue.o
 luajit.exe -b stddef_h.lua  stddef_h.o
 luajit.exe -b systypes_h.lua  systypes_h.o
 luajit.exe -b unit.lua  unit.o
+luajit.exe -b winapi_htmlayout.lua  winapi_htmlayout.o
 luajit.exe -b winapi_accelerator.lua  winapi_accelerator.o
 luajit.exe -b winapi_array.lua  winapi_array.o
 luajit.exe -b winapi_basebuttonclass.lua  winapi_basebuttonclass.o
