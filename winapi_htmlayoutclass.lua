@@ -1,5 +1,7 @@
 --oo/edit: standard edit control.
-setfenv(1, require'winapi_init')
+global_space = require'winapi_init'
+setfenv(1, global_space)
+
 require'winapi_controlclass'
 local ffi = require'ffi'
 
@@ -144,7 +146,42 @@ typedef void (__stdcall* DEBUG_OUTPUT_PROC)(LPVOID param, INT character);
                 DEBUG_OUTPUT_PROC     pfOutput  
                 );
 
+unsigned int wcstombs (char* dest, const wchar_t* src, size_t max);				
+typedef int HLDOM_RESULT;				
+HLDOM_RESULT HTMLayoutGetElementType(HELEMENT he, LPCSTR* p_type);
+HLDOM_RESULT HTMLayoutGetAttributeByName(HELEMENT he, LPCSTR name, LPCWSTR* p_value);
+			
+
+typedef struct MOUSE_PARAMS
+{
+  UINT      cmd;          // MOUSE_EVENTS
+  HELEMENT  target;       // target element
+  POINT     pos;          // position of cursor, element relative
+  POINT     pos_document; // position of cursor, document root relative
+  UINT      button_state; // MOUSE_BUTTONS or MOUSE_WHEEL_DELTA
+  UINT      alt_state;    // KEYBOARD_STATES 
+  UINT      cursor_type;  // CURSOR_TYPE to set, see CURSOR_TYPE
+  BOOL      is_on_icon;   // mouse is over icon (foreground-image, foreground-repeat:no-repeat)
+  
+  HELEMENT  dragging;     // element that is being dragged over, this field is not NULL if (cmd & DRAGGING) != 0
+  UINT      dragging_mode;// see DRAGGING_TYPE. 
+}MOUSE_PARAMS;
+
+HLDOM_RESULT HTMLayoutAttachEventHandlerEx( HELEMENT he, LPELEMENT_EVENT_PROC pep, LPVOID tag, UINT subscription );	
+
+typedef struct KEY_PARAMS
+{
+  UINT      cmd;          // KEY_EVENTS
+  HELEMENT  target;       // target element
+  UINT      key_code;     // key scan code, or character unicode for KEY_CHAR
+  UINT      alt_state;    // KEYBOARD_STATES   
+}KEY_PARAMS;
+
+			
 ]]
+
+
+
 HTMLayout_C = ffi.load("htmlayout")
 
 
@@ -163,7 +200,7 @@ HLN_DOCUMENT_LOADED   = 0xAFF + 0x0B
 
 HTMLayout = subclass({
 
-	__wm_command_handler_names = index{
+	__wm_notify_handler_names = {
 		on_create_control = HLN_CREATE_CONTROL,
 		on_load_data = HLN_LOAD_DATA,
 		on_control_created = HLN_CONTROL_CREATED,
@@ -183,6 +220,7 @@ HTMLayout = subclass({
 		w = -1, h = -1,
 		readonly = false,
 		client_edge = true,
+		
 
 	},		
 }, Control)
@@ -191,6 +229,87 @@ function HTMLayout:__before_create(info, args)
 	HTMLayout.__index.__before_create(self, info, args)
 	args.class = "HTMLAYOUT"
 end
+
+function WM_NOTIFY_DECODERS.HLN_LOAD_DATA(hdr) 
+end
+
+function WM_NOTIFY_DECODERS.HLN_CONTROL_CREATED(hdr) 
+end
+
+function WM_NOTIFY_DECODERS.HLN_DATA_LOADED(hdr) 
+end
+
+function WM_NOTIFY_DECODERS.HLN_DOCUMENT_COMPLETE(hdr) 
+end
+
+
+--From htmlayout_behavior.h
+HANDLE_INITIALIZATION = 0x0000    
+HANDLE_MOUSE = 0x0001              
+HANDLE_KEY = 0x0002                
+HANDLE_FOCUS = 0x0004              
+HANDLE_SCROLL = 0x0008             
+HANDLE_TIMER = 0x0010              
+HANDLE_SIZE = 0x0020               
+HANDLE_DRAW = 0x0040               
+HANDLE_DATA_ARRIVED = 0x080        
+HANDLE_BEHAVIOR_EVENT = 0x0100     
+HANDLE_METHOD_CALL = 0x0200        
+HANDLE_EXCHANGE   = 0x1000         
+HANDLE_GESTURE    = 0x2000               
+HANDLE_ALL        = 0xFFFF         
+DISABLE_INITIALIZATION = 0x80000000 
+
+
+--Stubbed functions that the user can redefine in order to capture these events                                      								  
+
+accesskeys = {}
+hyperlink = {}
+
+
+dispatcher = {}
+
+function WM_NOTIFY_DECODERS.HLN_ATTACH_BEHAVIOR(hdr) 
+	local t = ffi.cast('NMHL_ATTACH_BEHAVIOR*', hdr)
+	local behavior_name = ffi.string(t.behaviorName) 
+
+	local params
+	if(nil == dispatcher[behavior_name]) then
+		dispatcher[behavior_name] = {}
+	end	
+	if(nil ~= global_space[behavior_name].on_key) then
+		dispatcher[behavior_name].on_key = function(tag, he, evtg, prms )
+		   params = ffi.cast('KEY_PARAMS *',prms)
+		   global_space[behavior_name].on_key({cmd = params.cmd, key_code = params.key_code, alt_state = params.alt_state})
+		   return 0
+		end
+		HTMLayout_C.HTMLayoutAttachEventHandlerEx(t.element, dispatcher[behavior_name].on_key,t.elementTag,HANDLE_KEY)
+	end	
+end
+
+
+    
+                                          
+          
+
+
+
+
+
+update(WM_NOTIFY_NAMES, constants{
+	HLN_CREATE_CONTROL    = 0xAFF + 0x01,
+	HLN_LOAD_DATA         = 0xAFF + 0x02,
+	HLN_CONTROL_CREATED   = 0xAFF + 0x03,
+	HLN_DATA_LOADED       = 0xAFF + 0x04,
+	HLN_DOCUMENT_COMPLETE = 0xAFF + 0x05,
+	HLN_UPDATE_UI         = 0xAFF + 0x06,
+	HLN_DESTROY_CONTROL   = 0xAFF + 0x07,
+	HLN_ATTACH_BEHAVIOR   = 0xAFF + 0x08,
+	HLN_BEHAVIOR_CHANGED  = 0xAFF + 0x09,
+	HLN_DIALOG_CREATED    = 0xAFF + 0x10,
+	HLN_DIALOG_CLOSE_RQ   = 0xAFF + 0x0A,
+	HLN_DOCUMENT_LOADED   = 0xAFF + 0x0B 
+})
 
 
 function HTMLayout:ClassNameA() return HTMLayout_C.HTMLayoutClassNameA() end
