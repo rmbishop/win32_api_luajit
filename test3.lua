@@ -224,7 +224,20 @@ Symbol Entities in the Latin-1 Set:
 
   
   <a href="#">Link test</a>
+  <a href="#">Link test</a>
+  <a href="#">Link test</a>
+  <a href="#">Link test</a>
+  <a href="#">Link test</a>
+  <a href="#">Link test</a>
+  <a href="#">Link test</a>
+  <a href="#">Link test</a>
+  <a href="#">Link test</a>
+  <a href="#">Link test</a>
+  <a href="#">Link test</a>
+  <a href="#">Link test</a>
 
+  
+  
 </body>
 
 </html>
@@ -245,33 +258,48 @@ local main = winapi.Window{
 
 grid = {
 
-	on_initialization = function(event_code)
+	on_initialization = function(event)
 	end,
 	
 	on_key = function(event)
-	   print("HI")
+	   print("KEY")
 	end,
 
-	on_mouse = function(event_code)
+	on_mouse = function(event)
+	  print(html_events.BEHAVIOR_ATTACH)
 	end,
 
-	on_focus = function(event_code)
+	on_focus = function(event)
+	  print("FOCUS")
 	end,
 
-	on_scroll = function(event_code)
+	on_scroll = function(event)
+	   print("SCROLL")
 	end,
 
-	on_timer = function(event_code)
+	on_timer = function(event)
+		   print("TIMER")
 	end,	
 
-	on_size = function(event_code)
+	on_size = function(event)
+	   print("SIZE")
 	end,	
 
-	on_draw = function(event_code)
+	on_draw = function(event)
+	   print("DRAW")
 	end,		
 	
-	on_exchange = function(event_code)
+	on_exchange = function(event)
+	   print("EXCHANGE")
 	end,		
+
+	on_event = function(event)
+	   print("EVENT")
+	end,	
+
+	on_data_arrived = function(event)
+	   print("DATA ARRIVED")
+	end,	
 	
 }
 

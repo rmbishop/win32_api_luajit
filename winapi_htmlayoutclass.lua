@@ -177,13 +177,345 @@ typedef struct KEY_PARAMS
   UINT      alt_state;    // KEYBOARD_STATES   
 }KEY_PARAMS;
 
-			
+typedef struct FOCUS_PARAMS
+{
+  UINT      cmd;            // FOCUS_EVENTS
+  HELEMENT  target;         // target element, for FOCUS_LOST it is a handle of new focus element
+							// and for FOCUS_GOT it is a handle of old focus element, can be NULL
+  BOOL      by_mouse_click; // TRUE if focus is being set by mouse click
+  BOOL      cancel;         // in FOCUS_LOST phase setting this field to TRUE will cancel transfer focus from old element to the new one.
+}FOCUS_PARAMS;
+
+typedef struct SCROLL_PARAMS
+{
+  UINT      cmd;          // SCROLL_EVENTS
+  HELEMENT  target;       // target element
+  INT       pos;          // scroll position if SCROLL_POS
+  BOOL      vertical;     // TRUE if from vertical scrollbar
+}SCROLL_PARAMS;
+		
+typedef struct TIMER_PARAMS
+{
+  UINT_PTR timerId;    // timerId that was used to create timer by using HTMLayoutSetTimerEx
+}TIMER_PARAMS;		
+
+
+
+typedef struct DRAW_PARAMS
+{
+  UINT      cmd;          
+  HDC       hdc;          
+  RECT      area;          
+  UINT      reserved;     
+						  
+}DRAW_PARAMS;
+	
+
+typedef struct BEHAVIOR_EVENT_PARAMS
+{
+  UINT     cmd;        
+  HELEMENT heTarget;   
+  HELEMENT source_element;        
+  UINT     reason;     			   
+  LPVOID data;       
+}BEHAVIOR_EVENT_PARAMS;
+
+typedef struct DATA_ARRIVED_PARAMS
+{
+  HELEMENT  initiator;     
+  LPCBYTE   data;         
+  UINT      dataSize;     
+  UINT      dataType;     
+  UINT      status;       						 					  
+  LPCWSTR   uri;          
+}DATA_ARRIVED_PARAMS;
+
+typedef BOOL FETCH_EXCHANGE_DATA(LPVOID params, UINT data_type, LPCBYTE* ppDataStart, UINT* pDataLength );
+
+
+typedef struct EXCHANGE_PARAMS
+{
+	UINT      cmd;          
+	HELEMENT  target;       
+	POINT     pos;          
+	POINT     pos_view;     
+	UINT      data_types;   
+	UINT      drag_cmd;     
+	FETCH_EXCHANGE_DATA* fetch_data;		     
+}EXCHANGE_PARAMS;
+
+struct html_events
+{
+  enum
+  {
+	  HANDLE_INITIALIZATION = 0x0000,     
+	  HANDLE_MOUSE = 0x0001,              
+	  HANDLE_KEY = 0x0002,                
+	  HANDLE_FOCUS = 0x0004,              
+	  HANDLE_SCROLL = 0x0008,             
+	  HANDLE_TIMER = 0x0010,              
+	  HANDLE_SIZE = 0x0020,               
+	  HANDLE_DRAW = 0x0040,               
+	  HANDLE_DATA_ARRIVED = 0x080,        
+	  HANDLE_BEHAVIOR_EVENT = 0x0100,     
+										  
+										  
+	  HANDLE_METHOD_CALL = 0x0200,        
+
+	  HANDLE_EXCHANGE   = 0x1000,         
+	  HANDLE_GESTURE    = 0x2000,         
+	  
+	  HANDLE_ALL        = 0xFFFF,         
+
+	  DISABLE_INITIALIZATION = 0x80000000 
+  };
+
+
+  enum
+  {
+	  BUBBLING = 0,        
+	  SINKING  = 0x08000,  
+	  HANDLED  = 0x10000   
+	  
+  };
+
+  enum
+  {
+	  MAIN_MOUSE_BUTTON = 0x01, 
+	  PROP_MOUSE_BUTTON = 0x02, 
+	  MIDDLE_MOUSE_BUTTON = 0x04,
+	  X1_MOUSE_BUTTON = 0x08,
+	  X2_MOUSE_BUTTON = 0x10,
+  };
+
+  enum
+  {
+	  CONTROL_KEY_PRESSED = 0x1,
+	  SHIFT_KEY_PRESSED = 0x2,
+	  ALT_KEY_PRESSED = 0x4
+  };
+
+
+  enum
+  {
+	BEHAVIOR_DETACH = 0,
+	BEHAVIOR_ATTACH = 1
+  };
+
+
+  enum
+  {
+	NO_DRAGGING,
+	DRAGGING_MOVE,
+	DRAGGING_COPY,
+  };
+
+  enum
+  {
+	  MOUSE_ENTER = 0,
+	  MOUSE_LEAVE = 1,
+	  MOUSE_MOVE  = 2,
+	  MOUSE_UP    = 3,
+	  MOUSE_DOWN  = 4,
+	  MOUSE_DCLICK = 5,
+	  MOUSE_WHEEL = 6, 
+	  MOUSE_TICK  = 7, 
+	  MOUSE_IDLE  = 8, 
+
+	  DROP        = 9,   
+	  DRAG_ENTER  = 0xA, 
+	  DRAG_LEAVE  = 0xB, 
+	  DRAG_REQUEST = 0xC,  
+
+	  MOUSE_CLICK = 0xFF, 
+
+	  DRAGGING = 0x100, 
+						
+  };
+
+
+  enum
+  {
+	  CURSOR_ARROW, 
+	  CURSOR_IBEAM, 
+	  CURSOR_WAIT,  
+	  CURSOR_CROSS, 
+	  CURSOR_UPARROW,  
+	  CURSOR_SIZENWSE, 
+	  CURSOR_SIZENESW, 
+	  CURSOR_SIZEWE,   
+	  CURSOR_SIZENS,   
+	  CURSOR_SIZEALL,  
+	  CURSOR_NO,       
+	  CURSOR_APPSTARTING, 
+	  CURSOR_HELP,        
+	  CURSOR_HAND,        
+	  CURSOR_DRAG_MOVE,   
+	  CURSOR_DRAG_COPY,   
+  };
+
+  enum
+  {
+	  KEY_DOWN = 0,
+	  KEY_UP,
+	  KEY_CHAR
+  };
+
+  enum
+  {
+	  FOCUS_LOST = 0,
+	  FOCUS_GOT = 1,
+  };
+
+  enum
+  {
+	  BY_CODE,
+	  BY_MOUSE,
+	  BY_KEY_NEXT,
+	  BY_KEY_PREV
+  };
+
+  enum
+  {
+	  SCROLL_HOME = 0,
+	  SCROLL_END,
+	  SCROLL_STEP_PLUS,
+	  SCROLL_STEP_MINUS,
+	  SCROLL_PAGE_PLUS,
+	  SCROLL_PAGE_MINUS,
+	  SCROLL_POS,
+	  SCROLL_SLIDER_RELEASED
+  };
+
+
+  enum
+  {
+	GESTURE_REQUEST = 0, 
+	GESTURE_ZOOM,        
+	GESTURE_PAN,         
+	GESTURE_ROTATE,      
+	GESTURE_TAP1,        
+	GESTURE_TAP2,        
+  };
+  enum
+  {
+	GESTURE_STATE_BEGIN   = 1, 
+	GESTURE_STATE_INERTIA = 2, 
+	GESTURE_STATE_END     = 4, 
+  };
+
+  enum
+  {
+	GESTURE_FLAG_ZOOM               = 0x0001,
+	GESTURE_FLAG_ROTATE             = 0x0002,
+	GESTURE_FLAG_PAN_VERTICAL       = 0x0004,
+	GESTURE_FLAG_PAN_HORIZONTAL     = 0x0008,
+	GESTURE_FLAG_TAP1               = 0x0010, 
+	GESTURE_FLAG_TAP2               = 0x0020, 
+
+	GESTURE_FLAG_PAN_WITH_GUTTER    = 0x4000, 
+	GESTURE_FLAG_PAN_WITH_INERTIA   = 0x8000, 
+	GESTURE_FLAGS_ALL               = 0xFFFF, 
+  };
+
+  enum
+  {
+	  DRAW_BACKGROUND = 0,
+	  DRAW_CONTENT = 1,
+	  DRAW_FOREGROUND = 2,
+  };
+
+  enum
+  {
+	X_DRAG_ENTER,
+	X_DRAG_LEAVE,
+	X_DRAG,
+	X_DROP,
+  };
+
+  enum
+  {
+	EXF_UNDEFINED   = 0,
+	EXF_TEXT        = 0x01, 
+	EXF_HTML        = 0x02, 
+	EXF_HYPERLINK   = 0x04, 
+	EXF_JSON        = 0x08, 
+	EXF_FILE        = 0x10, 
+  };
+  enum
+  {
+	EXC_NONE = 0,
+	EXC_COPY = 1,
+	EXC_MOVE = 2,
+	EXC_LINK = 4,
+  };
+
+  enum
+  {
+	  BUTTON_CLICK = 0,              
+	  BUTTON_PRESS = 1,              
+	  BUTTON_STATE_CHANGED = 2,      
+	  EDIT_VALUE_CHANGING = 3,       
+	  EDIT_VALUE_CHANGED = 4,        
+	  SELECT_SELECTION_CHANGED = 5,  
+	  SELECT_STATE_CHANGED = 6,      
+	  POPUP_REQUEST   = 7,           
+	  POPUP_READY     = 8,           
+	  POPUP_DISMISSED = 9,           
+	  MENU_ITEM_ACTIVE = 0xA,        
+	  MENU_ITEM_CLICK = 0xB,         
+	  CONTEXT_MENU_SETUP   = 0xF,    
+	  CONTEXT_MENU_REQUEST = 0x10,   
+	  VISIUAL_STATUS_CHANGED = 0x11, 
+	  DISABLED_STATUS_CHANGED = 0x12,
+	  POPUP_DISMISSING = 0x13,       
+	  HYPERLINK_CLICK = 0x80,        
+	  TABLE_HEADER_CLICK,            
+	  TABLE_ROW_CLICK,               
+	  TABLE_ROW_DBL_CLICK,           
+	  ELEMENT_COLLAPSED = 0x90,      
+	  ELEMENT_EXPANDED,              
+	  ACTIVATE_CHILD,                
+	  DO_SWITCH_TAB = ACTIVATE_CHILD,
+	  INIT_DATA_VIEW,                	  
+	  ROWS_DATA_REQUEST,             
+	  UI_STATE_CHANGED,              
+	  FORM_SUBMIT,                   
+	  FORM_RESET,                    
+	  DOCUMENT_COMPLETE,             
+	  HISTORY_PUSH,                  
+	  HISTORY_DROP,                     
+	  HISTORY_PRIOR,
+	  HISTORY_NEXT,
+	  HISTORY_STATE_CHANGED,         
+	  CLOSE_POPUP,                   
+	  REQUEST_TOOLTIP,               
+	  ANIMATION         = 0xA0,      
+	  FIRST_APPLICATION_EVENT_CODE = 0x100 
+  };
+
+  enum
+  {
+	  BY_MOUSE_CLICK = 0,  
+	  BY_KEY_CLICK = 1, 
+	  SYNTHESIZED = 2, 
+  };
+
+  enum
+  {
+	  BY_INS_CHAR = 3,  
+	  BY_INS_CHARS, 
+	  BY_DEL_CHAR,  
+	  BY_DEL_CHARS, 
+  };
+};
+	
 ]]
 
 
 
 HTMLayout_C = ffi.load("htmlayout")
-
+html_events = ffi.new('struct html_events')
 
 HLN_CREATE_CONTROL    = 0xAFF + 0x01
 HLN_LOAD_DATA         = 0xAFF + 0x02
@@ -243,26 +575,7 @@ function WM_NOTIFY_DECODERS.HLN_DOCUMENT_COMPLETE(hdr)
 end
 
 
---From htmlayout_behavior.h
-HANDLE_INITIALIZATION = 0x0000    
-HANDLE_MOUSE = 0x0001              
-HANDLE_KEY = 0x0002                
-HANDLE_FOCUS = 0x0004              
-HANDLE_SCROLL = 0x0008             
-HANDLE_TIMER = 0x0010              
-HANDLE_SIZE = 0x0020               
-HANDLE_DRAW = 0x0040               
-HANDLE_DATA_ARRIVED = 0x080        
-HANDLE_BEHAVIOR_EVENT = 0x0100     
-HANDLE_METHOD_CALL = 0x0200        
-HANDLE_EXCHANGE   = 0x1000         
-HANDLE_GESTURE    = 0x2000               
-HANDLE_ALL        = 0xFFFF         
-DISABLE_INITIALIZATION = 0x80000000 
-
-
---Stubbed functions that the user can redefine in order to capture these events                                      								  
-
+--Stubbed behaviors that the user can redefine                                								  
 accesskeys = {}
 hyperlink = {}
 
@@ -274,6 +587,7 @@ function WM_NOTIFY_DECODERS.HLN_ATTACH_BEHAVIOR(hdr)
 	local behavior_name = ffi.string(t.behaviorName) 
 
 	local params
+	local point
 	if(nil == dispatcher[behavior_name]) then
 		dispatcher[behavior_name] = {}
 	end	
@@ -283,15 +597,94 @@ function WM_NOTIFY_DECODERS.HLN_ATTACH_BEHAVIOR(hdr)
 		   global_space[behavior_name].on_key({cmd = params.cmd, key_code = params.key_code, alt_state = params.alt_state})
 		   return 0
 		end
-		HTMLayout_C.HTMLayoutAttachEventHandlerEx(t.element, dispatcher[behavior_name].on_key,t.elementTag,HANDLE_KEY)
+		HTMLayout_C.HTMLayoutAttachEventHandlerEx(t.element, dispatcher[behavior_name].on_key,t.elementTag,html_events.HANDLE_KEY)
 	end	
+
+	if(nil ~= global_space[behavior_name].on_mouse) then
+		dispatcher[behavior_name].on_mouse = function(tag, he, evtg, prms )
+		   params = ffi.cast('MOUSE_PARAMS *',prms)
+		   global_space[behavior_name].on_mouse(
+		      {
+			     cmd = params.cmd, 
+				 pos = {params.pos.x,params.pos.y},
+				 pos_document = {params.pos_document.x,params.pos_document.y},
+				 button_state = params.button_state,
+				 alt_state = params.alt_state,
+				 cursor_type = params.cursor_type,
+				 is_on_icon = params.is_on_icon,
+				 dragging = params.dragging,
+				 dragging_mode = params.dragging_mode				 
+			  })
+		   return 0
+		end
+		HTMLayout_C.HTMLayoutAttachEventHandlerEx(t.element, dispatcher[behavior_name].on_mouse,t.elementTag,html_events.HANDLE_MOUSE)
+	end		
+
+	if(nil ~= global_space[behavior_name].on_focus) then
+		dispatcher[behavior_name].on_focus = function(tag, he, evtg, prms )
+		   params = ffi.cast('FOCUS_PARAMS *',prms)
+		   global_space[behavior_name].on_focus({cmd = params.cmd, by_mouse_click = params.by_mouse_click, cancel = params.cancel})
+		   return 0
+		end
+		HTMLayout_C.HTMLayoutAttachEventHandlerEx(t.element, dispatcher[behavior_name].on_focus,t.elementTag,html_events.HANDLE_FOCUS)
+	end	
+
+	if(nil ~= global_space[behavior_name].on_scroll) then
+		dispatcher[behavior_name].on_scroll = function(tag, he, evtg, prms )
+		   params = ffi.cast('SCROLL_PARAMS *',prms)
+		   global_space[behavior_name].on_scroll({cmd = params.cmd, pos = params.pos, vertical = params.vertical})
+		   return 0
+		end
+		HTMLayout_C.HTMLayoutAttachEventHandlerEx(t.element, dispatcher[behavior_name].on_scroll,t.elementTag,html_events.HANDLE_SCROLL)
+	end	
+
+	if(nil ~= global_space[behavior_name].on_exchange) then
+		dispatcher[behavior_name].on_exchange = function(tag, he, evtg, prms )
+		   params = ffi.cast('EXCHANGE_PARAMS *',prms)
+		   
+		   global_space[behavior_name].on_exchange({cmd = params.cmd, pos = {params.pos.x,params.pos.y},pos_view = {params.pos_view.x,params.pos_view.y}, data_types = params.data_types, drag_cmd = params.drag_cmd,fetch_data = params.fetch_data})
+		   return 0
+		end
+		HTMLayout_C.HTMLayoutAttachEventHandlerEx(t.element, dispatcher[behavior_name].on_exchange,t.elementTag,html_events.HANDLE_SCROLL)
+	end	
+	
+	if(nil ~= global_space[behavior_name].on_timer) then
+		dispatcher[behavior_name].on_timer = function(tag, he, evtg, prms )
+		   params = ffi.cast('TIMER_PARAMS *',prms)
+		   global_space[behavior_name].on_timer({timerId = params.timerId})
+		   return 0
+		end
+		HTMLayout_C.HTMLayoutAttachEventHandlerEx(t.element, dispatcher[behavior_name].on_timer,t.elementTag,html_events.HANDLE_TIMER)
+	end	
+
+	if(nil ~= global_space[behavior_name].on_draw) then
+		dispatcher[behavior_name].on_draw = function(tag, he, evtg, prms )
+		   params = ffi.cast('DRAW_PARAMS *',prms)
+		   global_space[behavior_name].on_draw({cmd = params.cmd, hdc = params.hdc, area = {left = params.area.left, right = params.area.right,top = params.area.top,bottom = params.area.bottom}})
+		   return 0
+		end
+		HTMLayout_C.HTMLayoutAttachEventHandlerEx(t.element, dispatcher[behavior_name].on_draw,t.elementTag,html_events.HANDLE_DRAW)
+	end	
+
+	if(nil ~= global_space[behavior_name].on_event) then
+		dispatcher[behavior_name].on_event = function(tag, he, evtg, prms )
+		   params = ffi.cast('BEHAVIOR_EVENT_PARAMS *',prms)
+		   global_space[behavior_name].on_event({cmd = params.cmd, source_element = params.source_element, reason = params.reason,data = params.data})
+		   return 0
+		end
+		HTMLayout_C.HTMLayoutAttachEventHandlerEx(t.element, dispatcher[behavior_name].on_event,t.elementTag,html_events.HANDLE_BEHAVIOR_EVENT)
+	end	
+
+	if(nil ~= global_space[behavior_name].on_data_arrived) then
+		dispatcher[behavior_name].on_data_arrived = function(tag, he, evtg, prms )
+		   params = ffi.cast('DATA_ARRIVED_PARAMS *',prms)
+		   global_space[behavior_name].on_data_arrived({initiator = params.initiator, data = params.data, dataSize = params.dataSize,dataType = params.dataType,status = params.status,uri = params.uri})
+		   return 0
+		end
+		HTMLayout_C.HTMLayoutAttachEventHandlerEx(t.element, dispatcher[behavior_name].on_data_arrived,t.elementTag,html_events.HANDLE_DATA_ARRIVED)
+	end		
+	
 end
-
-
-    
-                                          
-          
-
 
 
 
@@ -310,6 +703,7 @@ update(WM_NOTIFY_NAMES, constants{
 	HLN_DIALOG_CLOSE_RQ   = 0xAFF + 0x0A,
 	HLN_DOCUMENT_LOADED   = 0xAFF + 0x0B 
 })
+
 
 
 function HTMLayout:ClassNameA() return HTMLayout_C.HTMLayoutClassNameA() end
