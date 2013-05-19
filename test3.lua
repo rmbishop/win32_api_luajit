@@ -262,43 +262,46 @@ grid = {
 	end,
 	
 	on_key = function(event)
-	   print("KEY")
+	   --print("KEY")
 	end,
 
 	on_mouse = function(event)
-	  print(html_events.BEHAVIOR_ATTACH)
+	  --print(html_events.BEHAVIOR_ATTACH)
 	end,
 
 	on_focus = function(event)
-	  print("FOCUS")
+	  --print("FOCUS")
 	end,
 
 	on_scroll = function(event)
-	   print("SCROLL")
+	   --print("SCROLL")
+	   grid.SetInnerHtml("HELLO",SIH_REPLACE_CONTENT)
 	end,
 
 	on_timer = function(event)
-		   print("TIMER")
+		   --print("TIMER")
 	end,	
 
 	on_size = function(event)
-	   print("SIZE")
+	   --print("SIZE")
 	end,	
 
 	on_draw = function(event)
-	   print("DRAW")
+	   --print("DRAW")
 	end,		
 	
 	on_exchange = function(event)
-	   print("EXCHANGE")
+	   --print("EXCHANGE")
 	end,		
 
 	on_event = function(event)
-	   print("EVENT")
+	   local a = grid.GetInnerHtml(true)
+	   print(a)
+	   --print("EVENT")
 	end,	
 
 	on_data_arrived = function(event)
-	   print("DATA ARRIVED")
+	   --print("DATA ARRIVED")
 	end,	
 	
 }

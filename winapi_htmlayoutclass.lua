@@ -509,7 +509,171 @@ struct html_events
 	  BY_DEL_CHARS, 
   };
 };
-	
+
+typedef int * LPUINT;
+typedef int HLDOM_RESULT;
+typedef LPVOID HRANGE;
+typedef struct hposition { HELEMENT he; INT pos; } HPOSITION;
+HLDOM_RESULT  HTMLayout_UseElement(HELEMENT he);
+HLDOM_RESULT  HTMLayout_UnuseElement(HELEMENT he);
+HLDOM_RESULT  HTMLayoutGetRootElement(HWND hwnd, HELEMENT *phe);
+HLDOM_RESULT  HTMLayoutGetFocusElement(HWND hwnd, HELEMENT *phe);
+HLDOM_RESULT  HTMLayoutFindElement(HWND hwnd, POINT pt, HELEMENT* phe);
+HLDOM_RESULT  HTMLayoutGetChildrenCount(HELEMENT he, UINT* count);
+HLDOM_RESULT  HTMLayoutGetNthChild(HELEMENT he, UINT n, HELEMENT* phe);
+HLDOM_RESULT  HTMLayoutGetParentElement(HELEMENT he, HELEMENT* p_parent_he);
+HLDOM_RESULT  HTMLayoutGetElementText(HELEMENT he, LPWSTR characters, LPUINT length);
+HLDOM_RESULT  HTMLayoutGetElementHtml(HELEMENT he, LPBYTE* utf8bytes, BOOL outer);
+typedef void  HTMLayoutWriterCallbackB( LPCBYTE utf8, UINT utf8_length, LPVOID param );
+HLDOM_RESULT  HTMLayoutGetElementHtmlCB(HELEMENT he, BOOL outer, void* cb, void* cb_param);
+HLDOM_RESULT  HTMLayoutGetElementInnerText(HELEMENT he, LPBYTE* utf8bytes);
+HLDOM_RESULT  HTMLayoutSetElementInnerText(HELEMENT he, LPCBYTE utf8bytes, UINT length);
+HLDOM_RESULT  HTMLayoutGetElementInnerText16(HELEMENT he, LPWSTR* utf16words);
+typedef void  HTMLayoutWriterCallbackW( LPCWSTR text, UINT text_length, LPVOID param );
+HLDOM_RESULT  HTMLayoutGetElementInnerTextCB(HELEMENT he, void* cb, void* cb_param);
+HLDOM_RESULT  HTMLayoutSetElementInnerText16(HELEMENT he, LPCWSTR utf16words, UINT length);
+HLDOM_RESULT  HTMLayoutGetAttributeCount(HELEMENT he, LPUINT p_count);
+HLDOM_RESULT  HTMLayoutGetNthAttribute(HELEMENT he, UINT n, LPCSTR* p_name, LPCWSTR* p_value);
+HLDOM_RESULT  HTMLayoutGetAttributeByName(HELEMENT he, LPCSTR name, LPCWSTR* p_value);
+HLDOM_RESULT  HTMLayoutSetAttributeByName(HELEMENT he, LPCSTR name, LPCWSTR value);
+HLDOM_RESULT  HTMLayoutClearAttributes(HELEMENT he);
+HLDOM_RESULT  HTMLayoutGetElementIndex(HELEMENT he, LPUINT p_index);
+HLDOM_RESULT  HTMLayoutGetElementType(HELEMENT he, LPCSTR* p_type);
+HLDOM_RESULT  HTMLayoutGetStyleAttribute(HELEMENT he, LPCSTR name, LPCWSTR* p_value);
+HLDOM_RESULT  HTMLayoutSetStyleAttribute(HELEMENT he, LPCSTR name, LPCWSTR value);
+HLDOM_RESULT  HTMLayoutGetElementLocation(HELEMENT he, LPRECT p_location, UINT areas );
+HLDOM_RESULT  HTMLayoutScrollToView(HELEMENT he, UINT flags);
+HLDOM_RESULT  HTMLayoutUpdateElement(HELEMENT he, BOOL remeasure);
+HLDOM_RESULT  HTMLayoutUpdateElementEx(HELEMENT he, UINT flags);
+HLDOM_RESULT  HTMLayoutSetCapture(HELEMENT he);
+HLDOM_RESULT  HTMLayoutSetEventRoot(HELEMENT he, HELEMENT *phePrevRoot);
+HLDOM_RESULT  HTMLayoutGetElementHwnd(HELEMENT he, HWND* p_hwnd, BOOL rootWindow);
+HLDOM_RESULT  HTMLayoutCombineURL(HELEMENT he, LPWSTR szUrlBuffer, DWORD UrlBufferSize);
+typedef BOOL  HTMLayoutElementCallback( HELEMENT he, LPVOID param );
+HLDOM_RESULT  HTMLayoutVisitElements(HELEMENT  he, 
+	LPCSTR    tagName,
+	LPCSTR    attributeName, 
+	LPCWSTR   attributeValue, 
+	HTMLayoutElementCallback* 
+	callback, 
+	LPVOID    param,
+	DWORD     depth);
+HLDOM_RESULT  HTMLayoutSelectElements(
+	HELEMENT  he, 
+	LPCSTR    CSS_selectors,
+	HTMLayoutElementCallback* 
+	callback, 
+	LPVOID    param);
+HLDOM_RESULT  HTMLayoutSelectElementsW(
+	HELEMENT  he, 
+	LPCWSTR   CSS_selectors,
+	HTMLayoutElementCallback* 
+	callback, 
+	LPVOID    param);
+HLDOM_RESULT  HTMLayoutSelectParent(
+	HELEMENT  he, 
+	LPCSTR    selector,
+	UINT      depth,
+	HELEMENT* heFound);
+HLDOM_RESULT  HTMLayoutSelectParentW(
+	HELEMENT  he, 
+	LPCWSTR   selector,
+	UINT      depth,
+	HELEMENT* heFound);
+HLDOM_RESULT  HTMLayoutSetElementHtml(HELEMENT he, LPCBYTE html, DWORD htmlLength, UINT where);
+HLDOM_RESULT  HTMLayoutDeleteElement(HELEMENT he);
+HLDOM_RESULT  HTMLayoutGetElementUID(HELEMENT he, UINT* puid);
+HLDOM_RESULT  HTMLayoutGetElementByUID(HWND hwnd, UINT uid, HELEMENT* phe);
+HLDOM_RESULT  HTMLayoutShowPopup(HELEMENT hePopup, HELEMENT heAnchor, UINT placement);
+HLDOM_RESULT  HTMLayoutShowPopupAt(HELEMENT hePopup, POINT pos, UINT mode);
+HLDOM_RESULT  HTMLayoutTrackPopupAt(HELEMENT hePopup, POINT posRoot, UINT mode, HELEMENT* pheItem);
+HLDOM_RESULT  HTMLayoutHidePopup(HELEMENT he);
+typedef BOOL  ElementEventProc(LPVOID tag, HELEMENT he, UINT evtg, LPVOID prms );
+typedef ElementEventProc* LPELEMENT_EVENT_PROC;
+HLDOM_RESULT  HTMLayoutGetElementState( HELEMENT he, UINT* pstateBits);
+HLDOM_RESULT  HTMLayoutSetElementState( HELEMENT he, UINT stateBitsToSet, UINT stateBitsToClear, BOOL updateView);
+HLDOM_RESULT  HTMLayoutCreateElement( LPCSTR tagname, LPCWSTR textOrNull,  HELEMENT *phe );
+HLDOM_RESULT  HTMLayoutCloneElement( HELEMENT he,  HELEMENT *phe );
+HLDOM_RESULT  HTMLayoutInsertElement( HELEMENT he, HELEMENT hparent, UINT index );
+HLDOM_RESULT  HTMLayoutDetachElement( HELEMENT he );
+HLDOM_RESULT  HTMLayoutSetTimer( HELEMENT he, UINT milliseconds );
+HLDOM_RESULT  HTMLayoutSetTimerEx( HELEMENT he, UINT milliseconds, UINT_PTR timerId );
+HLDOM_RESULT  HTMLayoutAttachEventHandler( HELEMENT he, LPELEMENT_EVENT_PROC pep, LPVOID tag );
+HLDOM_RESULT  HTMLayoutDetachEventHandler( HELEMENT he, LPELEMENT_EVENT_PROC pep, LPVOID tag );
+HLDOM_RESULT  HTMLayoutAttachEventHandlerEx( HELEMENT he, LPELEMENT_EVENT_PROC pep, LPVOID tag, UINT subscription );
+HLDOM_RESULT  HTMLayoutWindowAttachEventHandler( HWND hwndLayout, LPELEMENT_EVENT_PROC pep, LPVOID tag, UINT subscription );
+HLDOM_RESULT  HTMLayoutWindowDetachEventHandler( HWND hwndLayout, LPELEMENT_EVENT_PROC pep, LPVOID tag );
+HLDOM_RESULT  HTMLayoutSendEvent(HELEMENT he, UINT appEventCode, HELEMENT heSource, UINT_PTR reason,  BOOL* handled);
+HLDOM_RESULT  HTMLayoutPostEvent(HELEMENT he, UINT appEventCode, HELEMENT heSource, UINT reason);
+typedef struct _METHOD_PARAMS METHOD_PARAMS;
+HLDOM_RESULT  HTMLayoutCallBehaviorMethod(HELEMENT he, METHOD_PARAMS* params);
+HLDOM_RESULT  HTMLayoutRequestElementData(HELEMENT he, LPCWSTR url, UINT dataType, HELEMENT initiator );
+enum REQUEST_TYPE
+{
+GET_ASYNC,  
+POST_ASYNC, 
+};
+typedef struct { LPCWSTR name; LPCWSTR value; } REQUEST_PARAM;
+
+	HLDOM_RESULT  HTMLayoutHttpRequest( 
+	HELEMENT        he,            
+	LPCWSTR         url,          
+	UINT            dataType,     
+	UINT            requestType,  
+	REQUEST_PARAM*  requestParams,
+	UINT            nParams      
+);
+HLDOM_RESULT  HTMLayoutGetScrollInfo( HELEMENT he, LPPOINT scrollPos, LPRECT viewRect, LPSIZE contentSize );
+HLDOM_RESULT  HTMLayoutSetScrollPos( HELEMENT he, POINT scrollPos, BOOL smooth );
+HLDOM_RESULT  HTMLayoutGetElementIntrinsicWidths( HELEMENT he, INT* pMinWidth, INT* pMaxWidth );
+HLDOM_RESULT  HTMLayoutGetElementIntrinsicHeight( HELEMENT he, INT forWidth, INT* pHeight );
+HLDOM_RESULT  HTMLayoutIsElementVisible( HELEMENT he, BOOL* pVisible);
+HLDOM_RESULT  HTMLayoutIsElementEnabled( HELEMENT he, BOOL* pEnabled );
+typedef INT ELEMENT_COMPARATOR( HELEMENT he1, HELEMENT he2, LPVOID param );
+HLDOM_RESULT  HTMLayoutSortElements( HELEMENT he, UINT firstIndex, UINT lastIndex, ELEMENT_COMPARATOR* cmpFunc, LPVOID cmpFuncParam );
+HLDOM_RESULT  HTMLayoutSwapElements( HELEMENT he1, HELEMENT he2 );
+HLDOM_RESULT  HTMLayoutTraverseUIEvent( UINT evt, LPVOID eventCtlStruct, LPBOOL bOutProcessed );
+HLDOM_RESULT  HTMLayoutProcessUIEvent( HELEMENT he, UINT evt, LPVOID eventCtlStruct, LPBOOL bOutProcessed );
+HLDOM_RESULT  HTMLayoutControlGetType( HELEMENT he,  UINT *pType );
+HLDOM_RESULT  HTMLayoutControlGetValue( HELEMENT he, VALUE *pVal );
+HLDOM_RESULT  HTMLayoutControlSetValue( HELEMENT he, const VALUE *pVal );
+typedef BOOL  HTMLayoutEnumerationCallback( LPVOID p, HELEMENT he, int pos, int postype, WCHAR code );
+HLDOM_RESULT  HTMLayoutEnumerate( HELEMENT he, HTMLayoutEnumerationCallback* pcb, LPVOID p, BOOL forward );
+HLDOM_RESULT  HTMLayoutGetCharacterRect( HELEMENT he, int pos, RECT* outRect );
+typedef struct 
+{
+	INT      rule_type;    
+	LPCSTR   file_url;     
+	INT      file_line_no; 
+	LPCWSTR  selector;     
+} HTMLayoutCSSRuleDef;
+typedef void HTMLayoutStyleRuleCallback( HTMLayoutCSSRuleDef* pdef, LPVOID callback_prm );
+HLDOM_RESULT  HTMLayoutEnumElementStyles( HELEMENT he, HTMLayoutStyleRuleCallback* callback, LPVOID callback_prm );
+typedef struct _HTMLayoutElementExpando HTMLayoutElementExpando;
+typedef void ExpandoRelease( HTMLayoutElementExpando* pexp, HELEMENT he );
+struct _HTMLayoutElementExpando
+{
+	ExpandoRelease* finalizer; 
+};
+HLDOM_RESULT  HTMLayoutElementSetExpando( HELEMENT he, HTMLayoutElementExpando* pExpando );
+HLDOM_RESULT  HTMLayoutElementGetExpando( HELEMENT he, HTMLayoutElementExpando** ppExpando );
+HLDOM_RESULT  HTMLayoutMoveElement( HELEMENT he, INT xView, INT yView);
+HLDOM_RESULT  HTMLayoutMoveElementEx( HELEMENT he, INT xView, INT yView,INT width, INT height);
+typedef UINT  HTMLayoutElementAnimator( HELEMENT he, UINT step, LPVOID animatorParam );
+HLDOM_RESULT  HTMLayoutAnimateElement( HELEMENT he, HTMLayoutElementAnimator* pAnimator, LPVOID animatorParam);
+HLDOM_RESULT  HTMLayoutEnqueueMeasure( HELEMENT he);
+UINT  HTMLayoutParseValue( LPCWSTR text, UINT textLength, UINT mode, VALUE *pVal );
+HLDOM_RESULT  HTMLayoutRangeCreate( HELEMENT he, HRANGE* pRange, BOOL outer );
+HLDOM_RESULT  HTMLayoutRangeFromSelection( HELEMENT he, HRANGE* pRange );
+HLDOM_RESULT  HTMLayoutRangeFromPositions( HELEMENT he, HPOSITION* pStart, HPOSITION* pEnd );
+HLDOM_RESULT  HTMLayoutRangeRelease( HRANGE range );
+HLDOM_RESULT  HTMLayoutRangeAdvancePos( HRANGE range, UINT cmd, INT* c, HPOSITION* pPos );
+HLDOM_RESULT  HTMLayoutRangeToHtml( HRANGE range, LPBYTE* pHtmlUtf8Bytes, UINT* numBytes );
+HLDOM_RESULT  HTMLayoutRangeReplace( HRANGE range, LPBYTE htmlUtf8Bytes, UINT numBytes );
+HLDOM_RESULT  HTMLayoutRangeInsertHtml( HPOSITION* pPos, LPBYTE htmlUtf8Bytes, UINT numBytes );
+HLDOM_RESULT  HTMLayoutRangeIsEmpty( HRANGE range, BOOL* pResult );
+
+
 ]]
 
 
@@ -582,15 +746,78 @@ hyperlink = {}
 
 dispatcher = {}
 
+SIH_REPLACE_CONTENT     = 0 
+SIH_INSERT_AT_START     = 1 
+SIH_APPEND_AFTER_LAST   = 2 
+
+SOH_REPLACE             = 3 
+SOH_INSERT_BEFORE       = 4  
+SOH_INSERT_AFTER        = 5  
+
 function WM_NOTIFY_DECODERS.HLN_ATTACH_BEHAVIOR(hdr) 
 	local t = ffi.cast('NMHL_ATTACH_BEHAVIOR*', hdr)
 	local behavior_name = ffi.string(t.behaviorName) 
-
 	local params
 	local point
 	if(nil == dispatcher[behavior_name]) then
 		dispatcher[behavior_name] = {}
-	end	
+	else
+	   return --only allow one element per behavior.
+	end
+	
+	if(nil ~= global_space[behavior_name]) then
+	   global_space[behavior_name].element = t.element  
+  
+	   
+	   global_space[behavior_name].GetOuterHtml = function()
+		  local result_data = ffi.new("unsigned char*[1]")
+
+		  HTMLayout_C.HTMLayoutGetElementHtml(global_space[behavior_name].element,
+		                                      result_data,
+											  true) 
+	      return ffi.string(result_data[0])										  
+		  
+	   end
+
+	   global_space[behavior_name].GetInnerHtml = function()
+		  local result_data = ffi.new("unsigned char*[1]")
+
+		  HTMLayout_C.HTMLayoutGetElementHtml(global_space[behavior_name].element,
+		                                      result_data,
+											  false) 
+	      return ffi.string(result_data[0])										  
+		  
+	   end	   
+	   
+	   global_space[behavior_name].SetInnerHtml = function(html_text)
+		  local result_data = ffi.new("unsigned char*[1]")
+
+		  HTMLayout_C.HTMLayoutSetElementHtml(global_space[behavior_name].element,
+		                                      html_text,
+											  #html_text,SIH_REPLACE_CONTENT) 
+		  
+	   end	   
+	   
+	   global_space[behavior_name].PrependInnerHtml = function(html_text)
+		  local result_data = ffi.new("unsigned char*[1]")
+
+		  HTMLayout_C.HTMLayoutSetElementHtml(global_space[behavior_name].element,
+		                                      html_text,
+											  #html_text,SIH_INSERT_AT_START) 
+		  
+	   end	
+	   
+	   global_space[behavior_name].AppendInnerHtml = function(html_text)
+		  local result_data = ffi.new("unsigned char*[1]")
+
+		  HTMLayout_C.HTMLayoutSetElementHtml(global_space[behavior_name].element,
+		                                      html_text,
+											  #html_text,SIH_APPEND_AFTER_LAST) 
+		  
+	   end		   
+	   
+	end
+	
 	if(nil ~= global_space[behavior_name].on_key) then
 		dispatcher[behavior_name].on_key = function(tag, he, evtg, prms )
 		   params = ffi.cast('KEY_PARAMS *',prms)
@@ -603,6 +830,7 @@ function WM_NOTIFY_DECODERS.HLN_ATTACH_BEHAVIOR(hdr)
 	if(nil ~= global_space[behavior_name].on_mouse) then
 		dispatcher[behavior_name].on_mouse = function(tag, he, evtg, prms )
 		   params = ffi.cast('MOUSE_PARAMS *',prms)
+
 		   global_space[behavior_name].on_mouse(
 		      {
 			     cmd = params.cmd, 
@@ -623,6 +851,7 @@ function WM_NOTIFY_DECODERS.HLN_ATTACH_BEHAVIOR(hdr)
 	if(nil ~= global_space[behavior_name].on_focus) then
 		dispatcher[behavior_name].on_focus = function(tag, he, evtg, prms )
 		   params = ffi.cast('FOCUS_PARAMS *',prms)
+
 		   global_space[behavior_name].on_focus({cmd = params.cmd, by_mouse_click = params.by_mouse_click, cancel = params.cancel})
 		   return 0
 		end
@@ -632,6 +861,7 @@ function WM_NOTIFY_DECODERS.HLN_ATTACH_BEHAVIOR(hdr)
 	if(nil ~= global_space[behavior_name].on_scroll) then
 		dispatcher[behavior_name].on_scroll = function(tag, he, evtg, prms )
 		   params = ffi.cast('SCROLL_PARAMS *',prms)
+
 		   global_space[behavior_name].on_scroll({cmd = params.cmd, pos = params.pos, vertical = params.vertical})
 		   return 0
 		end
@@ -641,6 +871,7 @@ function WM_NOTIFY_DECODERS.HLN_ATTACH_BEHAVIOR(hdr)
 	if(nil ~= global_space[behavior_name].on_exchange) then
 		dispatcher[behavior_name].on_exchange = function(tag, he, evtg, prms )
 		   params = ffi.cast('EXCHANGE_PARAMS *',prms)
+
 		   
 		   global_space[behavior_name].on_exchange({cmd = params.cmd, pos = {params.pos.x,params.pos.y},pos_view = {params.pos_view.x,params.pos_view.y}, data_types = params.data_types, drag_cmd = params.drag_cmd,fetch_data = params.fetch_data})
 		   return 0
@@ -651,6 +882,7 @@ function WM_NOTIFY_DECODERS.HLN_ATTACH_BEHAVIOR(hdr)
 	if(nil ~= global_space[behavior_name].on_timer) then
 		dispatcher[behavior_name].on_timer = function(tag, he, evtg, prms )
 		   params = ffi.cast('TIMER_PARAMS *',prms)
+
 		   global_space[behavior_name].on_timer({timerId = params.timerId})
 		   return 0
 		end
@@ -660,6 +892,7 @@ function WM_NOTIFY_DECODERS.HLN_ATTACH_BEHAVIOR(hdr)
 	if(nil ~= global_space[behavior_name].on_draw) then
 		dispatcher[behavior_name].on_draw = function(tag, he, evtg, prms )
 		   params = ffi.cast('DRAW_PARAMS *',prms)
+
 		   global_space[behavior_name].on_draw({cmd = params.cmd, hdc = params.hdc, area = {left = params.area.left, right = params.area.right,top = params.area.top,bottom = params.area.bottom}})
 		   return 0
 		end
@@ -669,6 +902,7 @@ function WM_NOTIFY_DECODERS.HLN_ATTACH_BEHAVIOR(hdr)
 	if(nil ~= global_space[behavior_name].on_event) then
 		dispatcher[behavior_name].on_event = function(tag, he, evtg, prms )
 		   params = ffi.cast('BEHAVIOR_EVENT_PARAMS *',prms)
+
 		   global_space[behavior_name].on_event({cmd = params.cmd, source_element = params.source_element, reason = params.reason,data = params.data})
 		   return 0
 		end
@@ -678,6 +912,7 @@ function WM_NOTIFY_DECODERS.HLN_ATTACH_BEHAVIOR(hdr)
 	if(nil ~= global_space[behavior_name].on_data_arrived) then
 		dispatcher[behavior_name].on_data_arrived = function(tag, he, evtg, prms )
 		   params = ffi.cast('DATA_ARRIVED_PARAMS *',prms)
+
 		   global_space[behavior_name].on_data_arrived({initiator = params.initiator, data = params.data, dataSize = params.dataSize,dataType = params.dataType,status = params.status,uri = params.uri})
 		   return 0
 		end
@@ -703,6 +938,7 @@ update(WM_NOTIFY_NAMES, constants{
 	HLN_DIALOG_CLOSE_RQ   = 0xAFF + 0x0A,
 	HLN_DOCUMENT_LOADED   = 0xAFF + 0x0B 
 })
+
 
 
 
