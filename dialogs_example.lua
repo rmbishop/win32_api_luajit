@@ -19,11 +19,12 @@ local main = winapi.Window{
 
 function OpenFiles(parent_hwnd)
 	file_list = GetOpenFileNameA({multiselect = true, hwnd = parent_hwnd,title="Test Open"})
-
+    return file_list 
 end
 
 function SaveFile(parent_hwnd)
     file_name = GetSaveFileNameA({title="test title",hwnd = parent_hwnd, default_name = "test name"})
+    return file_name
 end
 
 local file_submenu = Menu{
