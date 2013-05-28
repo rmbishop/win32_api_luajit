@@ -672,8 +672,6 @@ HLDOM_RESULT  HTMLayoutRangeToHtml( HRANGE range, LPBYTE* pHtmlUtf8Bytes, UINT* 
 HLDOM_RESULT  HTMLayoutRangeReplace( HRANGE range, LPBYTE htmlUtf8Bytes, UINT numBytes );
 HLDOM_RESULT  HTMLayoutRangeInsertHtml( HPOSITION* pPos, LPBYTE htmlUtf8Bytes, UINT numBytes );
 HLDOM_RESULT  HTMLayoutRangeIsEmpty( HRANGE range, BOOL* pResult );
-
-
 ]]
 
 
@@ -755,69 +753,69 @@ SOH_INSERT_BEFORE       = 4
 SOH_INSERT_AFTER        = 5  
 
 function WM_NOTIFY_DECODERS.HLN_ATTACH_BEHAVIOR(hdr) 
+	global_space["source_tree"] = {}
 	local t = ffi.cast('NMHL_ATTACH_BEHAVIOR*', hdr)
 	local behavior_name = ffi.string(t.behaviorName) 
 	local params
 	local point
+
 	if(nil == dispatcher[behavior_name]) then
 		dispatcher[behavior_name] = {}
 	else
 	   return --only allow one element per behavior.
 	end
-	
-	if(nil ~= global_space[behavior_name]) then
-	   global_space[behavior_name].element = t.element  
-  
-	   
-	   global_space[behavior_name].GetOuterHtml = function()
-		  local result_data = ffi.new("unsigned char*[1]")
 
-		  HTMLayout_C.HTMLayoutGetElementHtml(global_space[behavior_name].element,
-		                                      result_data,
-											  true) 
-	      return ffi.string(result_data[0])										  
-		  
-	   end
-
-	   global_space[behavior_name].GetInnerHtml = function()
-		  local result_data = ffi.new("unsigned char*[1]")
-
-		  HTMLayout_C.HTMLayoutGetElementHtml(global_space[behavior_name].element,
-		                                      result_data,
-											  false) 
-	      return ffi.string(result_data[0])										  
-		  
-	   end	   
-	   
-	   global_space[behavior_name].SetInnerHtml = function(html_text)
-		  local result_data = ffi.new("unsigned char*[1]")
-
-		  HTMLayout_C.HTMLayoutSetElementHtml(global_space[behavior_name].element,
-		                                      html_text,
-											  #html_text,SIH_REPLACE_CONTENT) 
-		  
-	   end	   
-	   
-	   global_space[behavior_name].PrependInnerHtml = function(html_text)
-		  local result_data = ffi.new("unsigned char*[1]")
-
-		  HTMLayout_C.HTMLayoutSetElementHtml(global_space[behavior_name].element,
-		                                      html_text,
-											  #html_text,SIH_INSERT_AT_START) 
-		  
-	   end	
-	   
-	   global_space[behavior_name].AppendInnerHtml = function(html_text)
-		  local result_data = ffi.new("unsigned char*[1]")
-
-		  HTMLayout_C.HTMLayoutSetElementHtml(global_space[behavior_name].element,
-		                                      html_text,
-											  #html_text,SIH_APPEND_AFTER_LAST) 
-		  
-	   end		   
-	   
+	if(nil == global_space[behavior_name]) then
+	   global_space[behavior_name] = {}
 	end
-	
+    
+	global_space[behavior_name].element = t.element  
+   
+    global_space[behavior_name].GetOuterHtml = function()
+	  local result_data = ffi.new("unsigned char*[1]")
+
+	  HTMLayout_C.HTMLayoutGetElementHtml(global_space[behavior_name].element,
+										  result_data,
+										  true) 
+	  return ffi.string(result_data[0])										  
+	  
+    end
+
+   global_space[behavior_name].GetInnerHtml = function()
+	  local result_data = ffi.new("unsigned char*[1]")
+
+	  HTMLayout_C.HTMLayoutGetElementHtml(global_space[behavior_name].element,
+										  result_data,
+										  false) 
+	  return ffi.string(result_data[0])										  
+	  
+   end	   
+   
+   global_space[behavior_name].SetInnerHtml = function(html_text)
+   
+	  HTMLayout_C.HTMLayoutSetElementHtml(global_space[behavior_name].element,
+										  html_text,
+										  #html_text,SIH_REPLACE_CONTENT) 
+	  
+   end	   
+   
+   global_space[behavior_name].PrependInnerHtml = function(html_text)
+
+	  HTMLayout_C.HTMLayoutSetElementHtml(global_space[behavior_name].element,
+										  html_text,
+										  #html_text,SIH_INSERT_AT_START) 
+	  
+   end	
+   
+   global_space[behavior_name].AppendInnerHtml = function(html_text)
+	  HTMLayout_C.HTMLayoutSetElementHtml(global_space[behavior_name].element,
+										  html_text,
+										  #html_text,SIH_APPEND_AFTER_LAST) 
+	  
+   end		   
+   
+
+
 	if(nil ~= global_space[behavior_name].on_key) then
 		dispatcher[behavior_name].on_key = function(tag, he, evtg, prms )
 		   params = ffi.cast('KEY_PARAMS *',prms)

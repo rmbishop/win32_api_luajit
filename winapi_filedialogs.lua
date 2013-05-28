@@ -123,22 +123,6 @@ typedef struct _OFNOTIFY {
 BOOL GetOpenFileNameA(OPENFILENAMEA *lpofn);
 BOOL GetSaveFileNameA(OPENFILENAMEA *lpofn);
 
-typedef struct _WIN32_FIND_DATA {
-  DWORD    dwFileAttributes;
-  FILETIME ftCreationTime;
-  FILETIME ftLastAccessTime;
-  FILETIME ftLastWriteTime;
-  DWORD    nFileSizeHigh;
-  DWORD    nFileSizeLow;
-  DWORD    dwReserved0;
-  DWORD    dwReserved1;
-  TCHAR    cFileName[32767];
-  TCHAR    cAlternateFileName[14];
-} WIN32_FIND_DATA, *PWIN32_FIND_DATA, *LPWIN32_FIND_DATA;
-
-
-HANDLE FindFirstFileA(LPCTSTR lpFileName, LPWIN32_FIND_DATA lpFindFileData);
-BOOL FindNextFileA(HANDLE hFindFile,LPWIN32_FIND_DATA lpFindFileData);
 
 DWORD GetFullPathNameA(LPCTSTR lpFileName,
                       DWORD nBufferLength,
@@ -199,6 +183,8 @@ function GetOpenFileNameA(file_info)
   local file_name        = ffi.new("char[" .. buf_size .. "]")
   local ret_val
   local file_list = {}
+  file_list.path = ""
+  file_list.files = {}
   file_dialog = ffi.new("OPENFILENAMEA")
   ffi.fill(file_dialog,ffi.sizeof(file_dialog),0) 
   file_dialog.lStructSize = ffi.sizeof(file_dialog)
@@ -234,36 +220,33 @@ function GetOpenFileNameA(file_info)
   
 
   comdlg.GetOpenFileNameA(file_dialog)
-  file_name = file_dialog.lpstrFile
+  first_file_name = file_dialog.lpstrFile
+
   
-  str_len = #ffi.string(file_name)
+  str_len = #ffi.string(first_file_name)
  
-  full_path = GetFullPathName(file_name)
+  full_path = GetFullPathName(first_file_name)
    
-  file_name = file_name + str_len + 1
+  file_name = first_file_name + str_len + 1
  
   --If there is only one file selected, add the file to the
   --list, and return it.  Else, there is more than one file,
   --and we should enter the while loop below.  The first
-  --file will be skipped, because of the 
-  --file_name = file_name + str_len + 1
-  --This is good, because the first file name is actually a
-  --directory name when there is more than one file.
- 
-  if(0 == #ffi.string(file_name)) then
-    table.insert(file_list,full_path) 
+  --file is actually a directory name when there is more than one file.
+  lua_file_name = ffi.string(file_name)
+  if(0 == #lua_file_name) then
+    file_list.path = full_path:sub(0,file_dialog.nFileOffset)
+    table.insert(file_list.files,lua_file_name) 
 	return file_list
   end
-  
+  file_list.path = first_file_name
   while(true) do
-	  str_len = #ffi.string(file_name)
-	  
+      lua_file_name = ffi.string(file_name)
+	  str_len = #lua_file_name
 	  if(0 == str_len) then
 		 break
 	  else
-	   full_path = GetFullPathName(file_name)
-	   table.insert(file_list,full_path)
-	   
+	   table.insert(file_list.files,lua_file_name)
 	   file_name = file_name + str_len + 1
 	  end
   end
