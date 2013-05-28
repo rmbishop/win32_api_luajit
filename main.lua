@@ -156,16 +156,21 @@ function SaveFile(parent_hwnd)
     return file_name
 end
 
+opening = 0
 local file_submenu = Menu{
 		items = {
 			{
 			text = 'Exit', on_click = function() main:close() end
 			},
 			{
-			text = 'Save', on_click = SaveFile
+			text = 'Save', on_click = function() SaveFile(main.hwnd) end
 			},
 			{
-			text = 'Open', on_click = function() file_list = OpenFiles(); htmlayout:LoadHtml(html_text); populate_tree(file_list);  end
+			text = 'Open', on_click = function() 
+						 file_list = OpenFiles(main.hwnd);
+						 htmlayout:LoadHtml(html_text); 
+						 populate_tree(file_list); 
+					    end
 			},
 		}
 	}
