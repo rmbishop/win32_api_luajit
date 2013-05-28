@@ -1,6 +1,6 @@
 --core/winapi: winapi namespace + core + ffi: the platform for loading any proc/ file or oo/ file.
 setfenv(1, require'winapi_namespace')
-require'winapi_debug'
+--require'winapi_debug'
 require'winapi_ffi'
 require'winapi_wintypes'
 require'winapi_util'
