@@ -32,4 +32,5 @@ Instructions for building a version of luajit with the library linked in:
 
 Here is the screenshot of running luajit.exe main.lua, which uses the HTMLayout control.
 
-<img src=https://raw.github.com/rmbishop/win32_api_luajit/blob/master/shot1.png>
+![ScreenShot](https://raw.github.com/rmbishop/win32_api_luajit/blob/master/shot1.png)
+
