@@ -5,6 +5,13 @@ Tracking of Cosmin's win32 api for luajit (with adjustments)
 
 https://code.google.com/p/lua-files/wiki/winapi
 
+To run the demo:  
+
+Checkout the files and run luajit.exe main.lua (the checkout comes with luajit.exe, though your own
+should suffice).
+
+
+
 Instructions for building a version of luajit with the library linked in:
 
 1)Checkout files to the luajit src directory.
@@ -23,6 +30,6 @@ Instructions for building a version of luajit with the library linked in:
 5)Run luajit.exe test.lua
 
 
-Here is the screenshot of running luajit.exe test2.lua, which uses the HTMLayout control.
+Here is the screenshot of running luajit.exe main.lua, which uses the HTMLayout control.
 
-<img src=https://github.com/rmbishop/win32_api_luajit/blob/master/shot1.png>
+<img src=https://raw.github.com/rmbishop/win32_api_luajit/blob/master/shot1.png>
