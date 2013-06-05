@@ -31,6 +31,10 @@ Instructions for building a version of luajit with the library linked in:
 
 
 Here is the screenshot of running luajit.exe main.lua, which uses the HTMLayout control.
+The file tree is running within HTMLayout, which means you can have arbitrary HTML within
+your tree view.
 
-![ScreenShot](https://raw.github.com/rmbishop/win32_api_luajit/blob/master/file_browse_basic.png)
+![ScreenShot](https://raw.github.com/rmbishop/win32_api_luajit/master/file_browse_basic.png)
 
+For Example, here are the tree nodes as html tables.
+![ScreenShot](https://raw.github.com/rmbishop/win32_api_luajit/master/file_browse_more.png)
