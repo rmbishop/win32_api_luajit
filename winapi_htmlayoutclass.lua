@@ -114,7 +114,7 @@ typedef void __stdcall   HTMLAYOUT_DATA_WRITER(LPCWSTR uri, UINT dataType, LPCBY
 typedef BOOL __stdcall   HTMLAYOUT_DATA_LOADER(LPCWSTR uri, UINT dataType, HTMLAYOUT_DATA_WRITER* pDataWriter);
  BOOL      HTMLayoutSetDataLoader(HTMLAYOUT_DATA_LOADER* pDataLoader);
  BOOL      HTMLayoutDeclareElementType(LPCSTR name, UINT/*ELEMENT_MODEL*/ elementModel);
- BOOL      HTMLayoutSetCSS(HWND hWndHTMLayout, LPCBYTE utf8, UINT numBytes, LPCWSTR baseUrl, LPCWSTR mediaType);
+ BOOL      HTMLayoutSetCSS(HWND hWndHTMLayout, LPCBYTE utf8, UINT numBytes);
  BOOL      HTMLayoutSetMediaType(HWND hWndHTMLayout, LPCWSTR mediaType);
  BOOL      HTMLayoutSetMediaVars(HWND hWndHTMLayout, const VALUE *mediaVars);
  BOOL      HTMLayoutSetHttpHeaders(HWND hWndHTMLayout, LPCSTR httpHeaders, UINT httpHeadersLength );
@@ -508,6 +508,47 @@ struct html_events
 	  BY_DEL_CHAR,  
 	  BY_DEL_CHARS, 
   };
+  
+	enum 
+	{
+	   STATE_LINK             = 0x00000001,
+	   STATE_HOVER            = 0x00000002,
+	   STATE_ACTIVE           = 0x00000004,
+	   STATE_FOCUS            = 0x00000008,
+	   STATE_VISITED          = 0x00000010,
+	   STATE_CURRENT          = 0x00000020,  
+	   STATE_CHECKED          = 0x00000040,  
+	   STATE_DISABLED         = 0x00000080,  
+	   STATE_READONLY         = 0x00000100,  
+	   STATE_EXPANDED         = 0x00000200,  
+	   STATE_COLLAPSED        = 0x00000400,  
+	   STATE_INCOMPLETE       = 0x00000800,  
+	   STATE_ANIMATING        = 0x00001000,  
+	   STATE_FOCUSABLE        = 0x00002000,  
+	   STATE_ANCHOR           = 0x00004000,  
+	   STATE_SYNTHETIC        = 0x00008000,  
+	   STATE_OWNS_POPUP       = 0x00010000,  
+	   STATE_TABFOCUS         = 0x00020000,  
+	   STATE_EMPTY            = 0x00040000,  
+											 
+	   STATE_BUSY             = 0x00080000,  
+	   
+	   STATE_DRAG_OVER        = 0x00100000,  
+	   STATE_DROP_TARGET      = 0x00200000,  
+	   STATE_MOVING           = 0x00400000,  
+	   STATE_COPYING          = 0x00800000,  
+	   STATE_DRAG_SOURCE      = 0x01000000,  
+	   STATE_DROP_MARKER      = 0x02000000,  
+	   
+	   STATE_PRESSED          = 0x04000000,  
+											 
+	   STATE_POPUP            = 0x08000000,  
+	   STATE_IS_LTR           = 0x10000000,  
+	   STATE_IS_RTL           = 0x20000000,  
+
+	};  
+	  
+  
 };
 
 typedef int * LPUINT;
@@ -549,7 +590,7 @@ HLDOM_RESULT  HTMLayoutSetCapture(HELEMENT he);
 HLDOM_RESULT  HTMLayoutSetEventRoot(HELEMENT he, HELEMENT *phePrevRoot);
 HLDOM_RESULT  HTMLayoutGetElementHwnd(HELEMENT he, HWND* p_hwnd, BOOL rootWindow);
 HLDOM_RESULT  HTMLayoutCombineURL(HELEMENT he, LPWSTR szUrlBuffer, DWORD UrlBufferSize);
-typedef BOOL  HTMLayoutElementCallback( HELEMENT he, LPVOID param );
+typedef BOOL  __stdcall HTMLayoutElementCallback( HELEMENT he, LPVOID param );
 HLDOM_RESULT  HTMLayoutVisitElements(HELEMENT  he, 
 	LPCSTR    tagName,
 	LPCSTR    attributeName, 
@@ -561,8 +602,7 @@ HLDOM_RESULT  HTMLayoutVisitElements(HELEMENT  he,
 HLDOM_RESULT  HTMLayoutSelectElements(
 	HELEMENT  he, 
 	LPCSTR    CSS_selectors,
-	HTMLayoutElementCallback* 
-	callback, 
+	HTMLayoutElementCallback* callback, 
 	LPVOID    param);
 HLDOM_RESULT  HTMLayoutSelectElementsW(
 	HELEMENT  he, 
@@ -672,6 +712,12 @@ HLDOM_RESULT  HTMLayoutRangeToHtml( HRANGE range, LPBYTE* pHtmlUtf8Bytes, UINT* 
 HLDOM_RESULT  HTMLayoutRangeReplace( HRANGE range, LPBYTE htmlUtf8Bytes, UINT numBytes );
 HLDOM_RESULT  HTMLayoutRangeInsertHtml( HPOSITION* pPos, LPBYTE htmlUtf8Bytes, UINT numBytes );
 HLDOM_RESULT  HTMLayoutRangeIsEmpty( HRANGE range, BOOL* pResult );
+
+int wcstombs (char* dest, const wchar_t* src, size_t max);
+int mbtowc (wchar_t* pwc, const char* pmb, size_t max);
+
+int clock(void);
+
 ]]
 
 
@@ -753,7 +799,6 @@ SOH_INSERT_BEFORE       = 4
 SOH_INSERT_AFTER        = 5  
 
 function WM_NOTIFY_DECODERS.HLN_ATTACH_BEHAVIOR(hdr) 
-	global_space["source_tree"] = {}
 	local t = ffi.cast('NMHL_ATTACH_BEHAVIOR*', hdr)
 	local behavior_name = ffi.string(t.behaviorName) 
 	local params
@@ -771,51 +816,6 @@ function WM_NOTIFY_DECODERS.HLN_ATTACH_BEHAVIOR(hdr)
     
 	global_space[behavior_name].element = t.element  
    
-    global_space[behavior_name].GetOuterHtml = function()
-	  local result_data = ffi.new("unsigned char*[1]")
-
-	  HTMLayout_C.HTMLayoutGetElementHtml(global_space[behavior_name].element,
-										  result_data,
-										  true) 
-	  return ffi.string(result_data[0])										  
-	  
-    end
-
-   global_space[behavior_name].GetInnerHtml = function()
-	  local result_data = ffi.new("unsigned char*[1]")
-
-	  HTMLayout_C.HTMLayoutGetElementHtml(global_space[behavior_name].element,
-										  result_data,
-										  false) 
-	  return ffi.string(result_data[0])										  
-	  
-   end	   
-   
-   global_space[behavior_name].SetInnerHtml = function(html_text)
-   
-	  HTMLayout_C.HTMLayoutSetElementHtml(global_space[behavior_name].element,
-										  html_text,
-										  #html_text,SIH_REPLACE_CONTENT) 
-	  
-   end	   
-   
-   global_space[behavior_name].PrependInnerHtml = function(html_text)
-
-	  HTMLayout_C.HTMLayoutSetElementHtml(global_space[behavior_name].element,
-										  html_text,
-										  #html_text,SIH_INSERT_AT_START) 
-	  
-   end	
-   
-   global_space[behavior_name].AppendInnerHtml = function(html_text)
-	  HTMLayout_C.HTMLayoutSetElementHtml(global_space[behavior_name].element,
-										  html_text,
-										  #html_text,SIH_APPEND_AFTER_LAST) 
-	  
-   end		   
-   
-
-
 	if(nil ~= global_space[behavior_name].on_key) then
 		dispatcher[behavior_name].on_key = function(tag, he, evtg, prms )
 		   params = ffi.cast('KEY_PARAMS *',prms)
@@ -946,3 +946,69 @@ function HTMLayout:LoadHtml(html_text)
 	HTMLayout_C.HTMLayoutLoadHtml(self.hwnd,html_text,html_text:len())
 end
 
+function HTMLayout:AppendMasterCSS(css_text) 
+	HTMLayout_C.HTMLayoutAppendMasterCSS(css_text,css_text:len())
+end
+
+DeleteElement = function(element)
+  return HTMLayout_C.HTMLayoutDeleteElement(element)									  
+end
+
+GetState = function(element)
+  local state = ffi.new("unsigned int[1]")
+
+  HTMLayout_C.HTMLayoutGetElementState(element,
+									  state) 
+  return state[0]										  
+  
+end  
+
+
+SelectElements = function(element,css_selectors,callback,param)
+	return HTMLayout_C.HTMLayoutSelectElements(element,
+									   css_selectors,callback,param)
+end
+
+
+
+GetOuterHtml = function(element)
+  local result_data = ffi.new("unsigned char*[1]")
+
+  HTMLayout_C.HTMLayoutGetElementHtml(element,
+									  result_data,
+									  true) 
+  return ffi.string(result_data[0])										  
+  
+end
+
+GetInnerHtml = function(element)
+  local result_data = ffi.new("unsigned char*[1]")
+  HTMLayout_C.HTMLayoutGetElementHtml(element,
+									  result_data,
+									  false) 								  
+  return ffi.string(result_data[0])										  
+  
+end	   
+
+SetInnerHtml = function(element,html_text)
+
+  HTMLayout_C.HTMLayoutSetElementHtml(element,
+									  html_text,
+									  #html_text,SIH_REPLACE_CONTENT) 
+  
+end	   
+
+PrependInnerHtml = function(element,html_text)
+
+  HTMLayout_C.HTMLayoutSetElementHtml(element,
+									  html_text,
+									  #html_text,SIH_INSERT_AT_START) 
+  
+end	
+
+AppendInnerHtml = function(element,html_text)
+  HTMLayout_C.HTMLayoutSetElementHtml(element,
+									  html_text,
+									  #html_text,SIH_APPEND_AFTER_LAST) 
+  
+end	

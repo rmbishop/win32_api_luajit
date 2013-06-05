@@ -183,10 +183,11 @@ function GetOpenFileNameA(file_info)
   local file_name        = ffi.new("char[" .. buf_size .. "]")
   local ret_val
   local file_list = {}
-  file_list.path = ""
+  file_list.path = nil
   file_list.files = {}
   file_dialog = ffi.new("OPENFILENAMEA")
   ffi.fill(file_dialog,ffi.sizeof(file_dialog),0) 
+  ffi.fill(file_name,buf_size,0)
   file_dialog.lStructSize = ffi.sizeof(file_dialog)
   file_dialog.hwndOwner = file_info.hwnd
   file_dialog.lpstrFile = file_name
@@ -194,6 +195,7 @@ function GetOpenFileNameA(file_info)
   file_dialog.lpstrTitle = ffi.new("char[" .. #title+1 .."]" ,title .. "\0")
   file_dialog.nMaxFileTitle = 0
   file_dialog.lpstrInitialDir = nil
+
   if(true == file_info.multiselect) then
      file_dialog.Flags = bit.bor(OFN_EXPLORER,OFN_ALLOWMULTISELECT,OFN_ENABLEHOOK)	
   end
@@ -211,6 +213,7 @@ function GetOpenFileNameA(file_info)
 		     
 		     file_dialog.nMaxFile = length + 1
 			 file_dialog.lpstrFile = ffi.new("char[" .. length .. "]")
+			 ffi.fill(file_dialog.lpstrFile,length,0)
 			 
 		   end
 		end
@@ -218,39 +221,40 @@ function GetOpenFileNameA(file_info)
 	 return 0
   end
   
-
   comdlg.GetOpenFileNameA(file_dialog)
-  first_file_name = file_dialog.lpstrFile
+  c_first_file_name = file_dialog.lpstrFile
 
+  lua_first_file_name = ffi.string(c_first_file_name)
+  if(0 == #lua_first_file_name) then
+    return file_list
+  end
   
-  str_len = #ffi.string(first_file_name)
- 
-  full_path = GetFullPathName(first_file_name)
    
-  file_name = first_file_name + str_len + 1
- 
+  c_next_file_name = c_first_file_name + #lua_first_file_name + 1
   --If there is only one file selected, add the file to the
   --list, and return it.  Else, there is more than one file,
   --and we should enter the while loop below.  The first
   --file is actually a directory name when there is more than one file.
-  lua_file_name = ffi.string(file_name)
-  if(0 == #lua_file_name) then
+  if(0 == #ffi.string(c_next_file_name)) then
+	full_path = GetFullPathName(c_first_file_name)
     file_list.path = full_path:sub(0,file_dialog.nFileOffset)
-    table.insert(file_list.files,lua_file_name) 
+    table.insert(file_list.files,
+	             lua_first_file_name:sub(
+				 file_dialog.nFileOffset+1,
+				 #lua_first_file_name))
+				   
 	return file_list
   end
-  file_list.path = first_file_name
-  while(true) do
-      lua_file_name = ffi.string(file_name)
-	  str_len = #lua_file_name
-	  if(0 == str_len) then
+  file_list.path = lua_first_file_name
+  while(true) do  
+      lua_next_file_name = ffi.string(c_next_file_name)
+	  if(0 == #lua_next_file_name) then
 		 break
 	  else
-	   table.insert(file_list.files,lua_file_name)
-	   file_name = file_name + str_len + 1
+	   table.insert(file_list.files,lua_next_file_name)
+	   c_next_file_name = c_next_file_name + #lua_next_file_name + 1
 	  end
   end
-  
   return file_list
 end
 

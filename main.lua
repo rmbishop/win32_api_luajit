@@ -5,83 +5,54 @@ require'winapi_menuclass'
 require'winapi_messagebox'
 require'winapi_htmlayoutclass'
 require'winapi_filedialogs'
-ffi = require'ffi'
+ffi = require("ffi")
+bit = require("bit")
 
 
+css_text = [[
 
-html_text = [[
-<HTML>
-	<HEAD>
-	<STYLE>
-    h1 
-    {
-      font-size: 14pt;
-    }
-    h2
-    {
-      font-size: 14pt;
-      text-align:right; 
-    }
-  
-    #dd options > * /* tree line support */
-    {
-      display: list-item;
-      --list-style-type: tree-line;
-      --list-marker-size:1px;
-      --list-marker-color:black;
-      --list-marker-style:solid;      
-    }
-    #dd options 
-    {
-      padding-left:16px;
-    }
-    #dd options >:first-child
-    {
-      margin-left:0;
-    } 
 	
-	#dd options.source_tree
+	options#file_free 
 	{
-	   behavior:source_tree;
-	}
+	   context-menu: selector(menu#source_file_context_menu);
+	   behavior:file_tree;
+	   border:none;
+	}	
 	
-    #dd option code
-    {
-      /*display:inline-block;
-      margin-left:*;
-      text-align:center;
-      min-width:2em;*/
-      background-color:cornsilk;
-      padding:0 2px;
-      border:1px solid threedshadow;
-    } 
-    
-    ul.tree-lines > li
-    {
-      display: list-item;
-      list-style-type: tree-line;
-      list-marker-color:green;
-      list-marker-style:dashed;      
-      list-marker-size:3px;
-      padding:2px;
-    }
-    
-	</STYLE>
-	</HEAD>
-	<BODY>
-  
-  <widget #dd type="select" style="height:*">
-    <options class = "source_tree">
-    <b>Files</b>
-	</options>
-  </widget> 
-  </BODY>
-  
-</HTML>
+	
+	
 
 ]]
 
+html_text = [[
+<HTML>
+  <BODY>
+  <frameset cols="200px,*">
+  <div>
+  <widget type="select" multiple style="height:*; width:*">
+  <options #file_free>
+  Files
+  </options>
+  </widget>
+  </div>
+  <splitter>
+  </splitter>	
+  <div>
+  test
+  </div>
+  </frameset>
+  
+  <menu.context id="source_file_context_menu">
+    <li style="behavior:context_remove_file" id="i1">Remove File</li>
+    <li id="i2">Second item</li>
+    <li id="i3">Third item</li>
+    <li id="i4">Fourth item</li>
+  </menu>	
 
+
+  </BODY>
+</HTML>
+]]
 
 local main = winapi.Window{
    title = 'Example',
@@ -90,7 +61,36 @@ local main = winapi.Window{
 
 }
 
-source_tree = {
+
+context_remove_file = {
+	on_mouse = function(event)
+	  if(html_events.MOUSE_DOWN == event.cmd) then
+	    if(html_events.MAIN_MOUSE_BUTTON == event.button_state) then
+		    to_delete = {}
+			SelectElements(file_tree.element,"option",
+			  function(element,param)
+			    if(html_events.STATE_CHECKED == 
+				  bit.band(GetState(element),html_events.STATE_CHECKED)) then
+				  table.insert(to_delete,element)
+				end
+				return 0
+			  end
+			
+			,nil)
+			
+			--do it in batch, not up above, or else htmlayout
+			--will become confused.
+			for i,element in pairs(to_delete) do
+			   DeleteElement(element)
+			end
+	    end
+	  end
+	end,
+
+}
+
+
+file_tree = {
 
 	on_initialization = function(event)
 	end,
@@ -128,7 +128,9 @@ source_tree = {
 	end,		
 
 	on_event = function(event)
-	   --print("EVENT")
+	--print(event.cmd)
+	
+	   
 	end,	
 
 	on_data_arrived = function(event)
@@ -137,18 +139,16 @@ source_tree = {
 	
 }
 
-function populate_tree(file_list)
-   for i,file in pairs(file_list.files) do	 
-     source_tree.AppendInnerHtml([[<option>]] .. file .. [[</option>]])
+function add_files(file_list)
+   for i,file in pairs(file_list.files) do	    
+	 AppendInnerHtml(file_tree.element,[[<option >]] .. [[<table border="1"><th>]] .. file .. [[</th><th></th><tr><td></td></tr><tr><td>Placeholder1</td><td>Placeholder2</td><tr></table>]] .. [[</option>]])
    end
-local a = source_tree.GetInnerHtml()
-print(a)
 end
 
 
 function OpenFiles(parent_hwnd)
 	file_list = GetOpenFileNameA({multiselect = true, hwnd = parent_hwnd,title="Test Open"})
-    return file_list
+	return file_list
 end
 
 function SaveFile(parent_hwnd)
@@ -156,7 +156,6 @@ function SaveFile(parent_hwnd)
     return file_name
 end
 
-opening = 0
 local file_submenu = Menu{
 		items = {
 			{
@@ -166,11 +165,14 @@ local file_submenu = Menu{
 			text = 'Save', on_click = function() SaveFile(main.hwnd) end
 			},
 			{
-			text = 'Open', on_click = function() 
+			text = 'Add File(s)', on_click = function() 
 						 file_list = OpenFiles(main.hwnd);
-						 htmlayout:LoadHtml(html_text); 
-						 populate_tree(file_list); 
-					    end
+
+						 if(0 ~= #file_list.files) then
+							 
+							 add_files(file_list); 
+					     end
+						end
 			},
 		}
 	}
@@ -202,9 +204,11 @@ htmlayout = HTMLayout
 					right = true,
 					bottom = true
 					},	
+					
 			}
 
-
+htmlayout:AppendMasterCSS(css_text)
+htmlayout:LoadHtml(html_text)
 Window.maximize(htmlayout)
 
 
